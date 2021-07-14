@@ -149,6 +149,12 @@
         </div>
         </div>
         <div class="form-row">
+          <div class="form-group col-12">
+            <p>Render Ad rotator: </p>
+            <%= render partial: 'rotator', locals: { urn: '160x160' } %>
+          </div>
+        </div>
+        <div class="form-row">
         <div class="form-group col-12">
           <%= label_tag 'password_static', 'Password', :class => 'sr-only' %>
           <div class="<%= 'field_with_errors' if @account.errors.keys.include? :password %>">
