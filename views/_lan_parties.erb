@@ -1,0 +1,181 @@
+<% if @current_account_or_token.supports_lan_parties? || @current_account_or_token.lan_parties.exists? %>
+  <div class="row">
+    <div class='col-12'>
+      <h3>LAN Parties</h3>
+    </div>
+  </div>
+  <% if @current_account_or_token.lan_parties.exists? %>
+    <div class="row">
+      <div class="col-12">
+        <h4>Received Party Invitations</h4>
+      </div>
+    </div>
+    <% @received_lan_party_invites.each do |party| %>
+      <% next if @current_account_or_token == party.host_account %>
+      <%= fields_for party do |f| %>
+        <div class="row">
+          <div class="col-12">
+            <div class="row">
+              <div class="col-12">
+                <strong>Sender</strong>&nbsp;
+                <span class="rg-branding-primary"><%= party.host_account.login %></span>
+              </div>
+              <div class="col-12">
+                <strong>Name</strong>&nbsp;
+                <span class="rg-branding-primary"><%= party.name %></span>
+              </div>
+              <div class="col-12">
+                <strong>Accepted Devices</strong>&nbsp;
+                <% if party.devices.empty? %>
+                  <p class="mx-2">&nbsp;–&nbsp;–&nbsp;</p>
+                <% else %>
+                  <% party.devices.sort_by{ |d| d.account == @current_account_or_token ? 0 : 1 }.each do |device| %>
+                    <%= device.account.login %> -
+                    [<%= [device.name, device.mac].uniq.join(', ') %>] -
+                    <%= device.ip || 'offline' %>
+                    <% if device.account == @current_account_or_token %>
+                      <%= link_to 'Leave', {action: :remove_device_from_lan_party, id: device.id}, :class => 'text-primary' %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              </div>
+              <div class="col-12">
+                <div class="row">
+                  <div class="col-6">
+                    <%=
+                      content_tag('button', {
+                        :class => 'btn btn-lg btn-primary col-12',
+                        :data => { "target" => "#accept_invite_#{party.id}", "toggle" =>"modal" },
+                        :disabled => party.host_account.party_device_limit_reached?
+                      }) do
+                       party.host_account.party_device_limit_reached? ? 'Party Full' : 'Accept'
+                     end
+                    %>
+                  </div>
+                  <div class="col-6">
+                    <%= link_to 'Delete Invitation', {action: :delete_lan_party_invitation, id: party.id},
+                    :class => 'btn btn-lg btn-danger col-12' %>
+                    <%= render :partial => 'accept_lan_party_invite_modal', :locals => { :party => party} %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      <hr>
+    <% end %>
+  <% end %>
+  <% if @current_account_or_token.supports_lan_parties? %>
+    <div class="row">
+      <div class="col-12">
+        <h4>My LAN Parties</h4>
+      </div>
+    </div>
+    <% if @current_account_or_token.party_device_limit_reached? %>
+    <div class="row">
+      <div class="col-12">
+        <p>
+          You have reached your party device limit.  You may not create any
+          additional LAN parties until you remove members from one or more of
+          your active LAN parties below.
+        </p>
+      </div>
+    </div>
+    <% else %>
+      <div class="row">
+        <div class="col-12">
+          <%= link_to 'Create a LAN Party', '#create_lan_party_modal', { :class => "col-4 btn btn-lg mx-auto mb-4 #{@lan_party.errors.any? ? 'btn-danger' : 'btn-primary'}", data: {"toggle" => "modal"} } %>
+          <%= link_to 'Join a LAN Party', '#join_lan_party_modal', { :class => 'col-4 btn btn-lg btn-secondary mx-auto mb-4', data: {"toggle" => "modal"} } %>
+        </div>
+      </div>
+      <%= render :partial => 'create_lan_party_modal' %>
+      <%= render :partial => 'join_lan_party_modal' %>
+    <% end %>
+    <% unless @hosted_lan_parties.any? %>
+      <h5 class="text-center">No active LAN Parties</h5>
+    <% end %>
+    <% @hosted_lan_parties.each do |party| %>
+      <div class="row">
+        <div class="col-12">
+          <div class="row">
+            <div class="col-12">
+              <strong>Name</strong>&nbsp;
+              <span class="rg-branding-primary"><%= party.name %></span>
+            </div>
+            <div class="col-12">
+              <strong>Invited Users</strong><br>
+              <% if party.accounts.empty? %>
+                  <p class="mx-2">&nbsp;–&nbsp;–&nbsp;</p>
+                <% else %>
+              <% party.accounts.each do |account| %>
+                <%= [ account.login, account.email ].compact.uniq.join(' - ') %>&nbsp;&nbsp;
+                <span><%= link_to 'Revoke', {action: :remove_account_from_lan_party, id: party.id, account_id: account.id}, :class => 'text-danger' %></span>
+                <% end %>
+              <% end %>
+            </div>
+            <div class="col-12">
+              <strong>Member Devices</strong><br>
+              <% if party.devices.empty? %>
+                <p class="mx-2">&nbsp;–&nbsp;–&nbsp;</p>
+              <% else %>
+                <% party.devices
+                        .sort_by{ |d| d.account_id == @current_account_or_token.id ? 0 : 1 }
+                        .each do |device| %>
+                  <span class="rg-branding-primary"><%= device.account.login %></span> -
+                  [<%= [device.name, device.mac].uniq.join(', ') %>] -
+                  <%= device.ip || 'offline' %>
+                  <%= link_to 'kick', {action: :remove_device_from_lan_party, id: device.id}, class: 'text-danger' %>
+                <% end %>
+              <% end %>
+            </div>
+            <div class="col-12 mb-4">
+            <div class="row">
+              <div class="col-4">
+              <%=
+                content_tag('button', {
+                  :class => 'btn btn-lg btn-primary col-12',
+                  :data => { "toggle" => "modal", "target" => "#invite_lan_party_#{party.id}" },
+                  :disabled => @current_account_or_token.party_device_limit_reached?
+                }) do
+                 'Invite'
+               end
+                %>
+              </div>
+              <div class="col-4">
+                <%= link_to 'Edit Party',   "#update_lan_party_#{party.id}",   { :class => "btn btn-lg col-12 #{party.errors.any? ? 'btn-danger' : 'btn-secondary'}" , data: {"toggle" => "modal"} } %>
+                </div>
+                <div class="col-4">
+                <%=
+                link_to 'Delete Party', {action: :delete_lan_party_invitation, id: party.id},
+                  { :class => 'btn btn-lg btn-danger col-12',
+                    :data => { confirm: 'Deleting this party will remove all of its guests from your network.  Proceed?' } } %>
+                  </div>
+                  </div>
+            </div>
+            <%= render :partial => 'invite_lan_party_modal', :locals => {party: party} %>
+            <%# Edit modal %>
+            <aside id="update_lan_party_<%= party.id %>" class="modal" tabindex="-1" role="dialog">
+              <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                  <header class="modal-header">
+                    <h2 class="inline-block">Edit LAN Party</h2>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fas fa-times"></i></span>
+                      </button>
+                  </header>
+                  <main class="modal-body">
+                    <%= render :partial => 'lan_party_form', :locals => {lan_party: party} %>
+                  </main>
+                  <footer class="modal-footer">
+                    <button type="button" class="btn btn-lg btn-secondary" data-dismiss="modal">Cancel</button>
+                  </footer>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    <% end # hosted_lan_parties.each %>
+  <% end %>
+<% end %>

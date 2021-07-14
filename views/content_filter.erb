@@ -1,0 +1,22 @@
+
+<div class="row">
+  <div class="col-12">
+    <h2 class='text-danger text-center'>Content Not Permitted<br><i class="fas fa-ban"></i></h2>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12">
+    <dl class="contentfilter">
+      <dt> Denied URL </dt>
+      <dd> <%= link_to(params[:DENIEDURL], params[:DENIEDURL]) %> 🚫</dd>
+      <!--
+      <dt> reason </dt>
+      <dd> <%= params[:REASON] %> </dd>
+       -->
+      <dt> Categories </dd>
+      <% params[:CATEGORIES].to_s.split(',').each do |category| %>
+        <dd><%= category.to_s.sub(/.*-/, '') %> 🚫</dd>
+      <% end %>
+    </dl>
+  </div>
+</div>

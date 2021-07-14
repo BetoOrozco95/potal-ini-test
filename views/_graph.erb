@@ -1,0 +1,28 @@
+<% display_style = 'block' %>
+<% hidden ||= false %>
+<% display_style = 'none' if hidden || (defined?(graph_id) && graph_id != 0) %>
+<% graph_id ||= graph.id || Random.hex %>
+<% graph_type = graph.bar_chart? ? 'Bar' : 'Line' %>
+<% graph.grouped_by = 'hour_of_day' if (graph.grouped_by.in?(['minute', 'hour']) && graph.graph_time.duration >= 1.week) %>
+<% graph_time = graph.graph_time.start_at_label %>
+
+<% fallback = graph.bar_chart? ? '[{"values": [[0,0],[0,0]]}]' : '{"meta": {}, "data": []}' %>
+<% json = (graph.gen_export_json || fallback).html_safe %>
+
+
+<div class="col-12 p-2 portal-graphs-container" id="<%= "graph#{graph_id.to_s}" %>" style="display:<%= display_style %>">
+
+  <div class="col-12 hide-no-data ct-chart <%= 'line-chart' if !graph.bar_chart? %>" id="chart-<%= graph_id.to_s %>"></div>
+
+</div>
+
+<script>
+  window.charts = window.charts || {};
+  window.charts['#<%= "graph#{graph_id.to_s}" %>'] = initGraph(<%= json %>, '#<%= "graph#{graph_id.to_s}" %>', {
+    name: '<%= graph.name %>',
+    groupBy: '<%= graph.grouped_by %>',
+    isBarChart:  <%= graph.bar_chart? ? 'true' : 'false' %>,
+    id: '<%= graph_id %>',
+    graphTime: '<%= graph_time %>'
+  });
+</script>

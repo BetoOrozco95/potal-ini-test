@@ -1,0 +1,135 @@
+/* BOOTSTRAP OVERRIDES */
+:root {
+  --primary: #0E97ED;
+  --info: #29ABE2;
+}
+
+body {
+  color: var(--textColor) !important;
+  font-family: 'Arial', sans-serif !important;
+  overflow-x: hidden;
+}
+
+.alert span {
+  display: block;
+  margin: auto;
+  text-align: center;
+}
+
+input, select {
+  box-shadow: 0px 3px 6px var(--dropShadow);
+  border-radius: 5px;
+  border: none;
+  font-size: 1.25rem;
+}
+
+a {
+  color: var(--primary) !important;
+}
+a.nav-link.sidebar {
+  color: var(--white) !important;
+}
+
+::placeholder {
+  opacity: 50%;
+}
+
+.alert {
+  margin-bottom: 0;
+  border-radius: 0 !important;
+}
+
+/* overrides for accessibility style support */
+
+.btn-light {
+  background: var(--white) !important;
+  color: var(--textColor) !important;
+}
+
+.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+.btn-primary {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--white) !important;
+}
+
+.text-primary {
+color: var(--primary) !important;
+}
+
+.bg-secondary {
+  background-color: var(--secondary) !important;
+}
+
+.btn-secondary {
+  background-color: var(--secondary) !important;
+  border-color: var(--secondary) !important;
+  color: var(--white) !important;
+}
+
+.text-secondary {
+  color: var(--secondary) !important;
+}
+
+.bg-danger {
+  background-color: var(--danger) !important;
+}
+
+.btn-danger {
+  background-color: var(--danger) !important;
+  border-color: var(--danger) !important;
+  color: var(--white) !important;
+}
+
+.text-danger {
+  color: var(--danger) !important;
+}
+
+.bg-success {
+  background-color: var(--success) !important;
+}
+
+.btn-success {
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
+}
+
+.text-success {
+  color: var(--success) !important;
+}
+
+.progress {
+  background-color: #c1c4c7;
+}
+
+.progress-bar {
+  overflow:visible;
+}
+
+.shadow-sm {
+  box-shadow: 0px 3px 6px var(--dropShadow) !important;
+}
+
+.navbar-toggler {
+  border: none !important;
+}
+
+.navbar-toggler-icon {
+  color: var(--primary) !important;
+  background: none !important;
+}
+
+.navbar-light .navbar-nav .active>.nav-link, .navbar-light .navbar-nav .nav-link.active, .navbar-light .navbar-nav .nav-link.show, .navbar-light .navbar-nav .show>.nav-link {
+  color: var(--secondary);
+}
+
+@media (min-width: 992px) {
+  .navbar-expand-md {
+    display: none !important;
+  }
+}
+
+/* END BOOTSTRAP OVERRIDES */

@@ -1,0 +1,61 @@
+<%= form_tag({:action => ( pf.persisted? ? :update_device_port_forward : :add_device_port_forward)}, :class => 'col-12') do %>
+  <%= fields_for pf do |f| %>
+    <%= f.hidden_field :id, {:id => nil} %>
+    <% unless pf.errors.empty? %>
+      <div class="form-row">
+        <div class="form-group col-12">
+          <%= error_messages_for :port_forward %>
+        </div>
+      </div>
+    <% end %>
+    <fieldset>
+      <div class="form-row">
+        <legend class="col-12 text-center"><%= 'Add ' unless pf.persisted? %>Port Forward</legend>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-12">
+          <%= f.label :name, "Name (Optional)", :class => 'sr-only' %>
+          <%= f.text_field :name, :placeholder => 'Name (Optional)...', :class => 'form-control form-control-lg', :id => nil %>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-12">
+          <%= f.label :external_ports, "External Port(s)", :class => 'sr-only' %>
+          <%= f.text_field :external_ports, :placeholder => 'External Port(s)...', :class => 'form-control form-control-lg', :id => nil %>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-12">
+          <%= f.label :internal_ports, "Internal Ports (Optional)", :class => 'sr-only' %>
+          <%= f.text_field :internal_ports, :placeholder => 'Internal Ports (Optional)...', :class => 'form-control form-control-lg', :id => nil %>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <%= f.label :name, "Protocol", :class => 'font-weight-bold' %>
+          <%= f.collection_select :protocol, NetApp::PORT_PROTOCOLS, :to_s, :to_s, {}, {:class => 'form-control form-control form-control-lg', :id => nil, :placeholder => 'Protocol...' } %>
+        </div>
+        <div class="form-group col-6">
+          <%= f.label :device_id, "Device", :class => 'font-weight-bold' %>
+          <%= f.collection_select :device_id, @current_account_or_token.devices.portal_visible, :id, :name, {include_blank: 'Disabled'}, {:class => 'form-control form-control form-control-lg', :id => nil} %>
+        </div>
+      </div>
+      <div class="form-row">
+        <% if pf.persisted? %>
+          <div class="form-group col-6">
+            <%= button_tag 'Update', :class => 'col-12 btn btn-lg btn-primary', :name => 'commit', :value => 'Update', :data => {:disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Updating' } %>
+          </div>
+          <div class="form-group col-6">
+            <%= button_tag 'Delete', :class => 'col-12 btn btn-lg btn-danger', :name => 'commit', :value => 'Delete', data: { confirm: 'Are you sure you want to delete this port forward?', :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status"
+            aria-hidden="true"></span>Deleting' } %>
+          </div>
+        <% else %>
+          <div class="form-group col-12">
+            <%= button_tag 'Add' , :class => 'col-12 btn btn-lg btn-primary', :name => 'commit', :value => 'Add' %>
+          </div>
+        <% end %>
+      </div>
+    </fieldset>
+  <% end %>
+<% end %>
+<hr>

@@ -1,0 +1,25 @@
+<tr>
+  <th></th>
+  <td>
+    <%= l(ls.updated_at) %>
+  </td>
+  <td>
+    <%= ls.ip %>
+  </td>
+  <td>
+    <%= ls.http_user_agent ? ls.http_user_agent.name : '–' %>
+  </td>
+  <td class="action-cell">
+    <% if @current_account && @current_account.lock_devices == false %>
+      <% if ls.mac == client_mac %>
+        <%= link_to('Logout', {:action => :login_session_destroy}, {:class => 'd-block mx-auto text-center', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...',
+        data: { confirm: 'This will log you out. Proceed?' } }}) %>
+      <% else %>
+        <%= form_tag(:action => :logout_device, :existing_login_session_id => ls.id) do %>
+        <%# Prevent an end-user from logging out her current session %>
+          <%= button_tag('Logout', :class => 'btn btn-lg btn-danger d-block mx-auto text-center', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' }) %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </td>
+</tr>

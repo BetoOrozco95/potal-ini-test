@@ -1,0 +1,20 @@
+<div>
+	<%= form_tag({action: :quick_purchase}, method: :get) do %>
+		<fieldset>
+			<legend class="col-12 text-center">Don't have an account?</legend>
+			<% if Coupon.usage_plan_access_coupons.exists? %>
+				<div class="form-row">
+					<div class="form-group col-12">
+						<%= label_tag :plans_coupon, "Signup Code#{' (Optional)' if @usage_plans.any?}", class: 'sr-only'  %>
+						<%= text_field_tag :plans_coupon, session[:plans_coupon], placeholder: "Signup Code#{' (Optional)' if @usage_plans.any?}", class: 'form-control form-control-lg' %>
+					</div>
+				</div>
+			<% end %>
+			<div class="form-row">
+				<div class="form-group col-12">
+					<%= button_tag 'Create Login', type: 'submit', class: 'col-6 d-block mx-auto text-center shadow-sm btn btn-primary' %>
+				</div>
+			</div>
+		</fieldset>
+	<% end %>
+</div>

@@ -1,0 +1,65 @@
+<div>
+  <div class="row">
+    <div class="col-12">
+      <p class="text-center">
+        Currently assigned public IP: <strong><%= @current_account.nat_assignments.first.try(:nat_ip) || 'Unknown' %></strong>
+      </p>
+    </div>
+  </div>
+  <% @ddclients = [Ddclient.new] %>
+  <div class="row bg-dark text-light">
+    <div class="col-9 col-md-6">
+      Protocol
+    </div>
+    <div class="col-12 col-md-8">
+      <div class="form-group col-4">
+        Domain Name
+      </div>
+      <div class="form-group col-4">
+        Username
+      </div>
+      <div class="form-group col-4">
+        Password
+      </div>
+    </div>
+    <div class="form-group col-md-2">
+    </div>
+  </div>
+  <% @ddclients.each do |ddclient| %>
+    <%= form_for( ddclient, :url => {action: :save_ddclient_config}) do |f| %>
+      <fieldset class="form-row">
+        <%= f.hidden_field :id, :id => nil %>
+        <div class="col-9 col-md-6">
+          <div class="form-group col-12">
+            <%= f.label :protocol, 'Protocol', :class => 'sr-only '%>
+            <%= f.collection_select :protocol, Ddclient::PROTOCOLS, :last, :first, { }, {:class => 'form-control form-control form-control-lg', :id => nil}  %>
+          </div>
+        </div>
+        <div class="col-12 col-md-8">
+          <div class="form-group col-4">
+            <%= f.label :hosts, 'Host', :class => 'sr-only '%>
+            <%= f.text_field :hosts, {:class => 'form-control form-control-lg', :id => nil, :placeholder => "Host"} %>
+          </div>
+          <div class="col-4">
+            <%= f.label :login, 'Login', :class => 'sr-only '%>
+            <%= f.text_field :login, {:class => 'form-control form-control-lg', :id => nil, :autocomplete => "off", :placeholder => "Login"} %>
+          </div>
+          <div class="col-4">
+            <%= f.label :protocol, 'Password', :class => 'sr-only '%>
+            <%= f.password_field :password, {:class => 'form-control form-control-lg', :id => nil, :autocomplete => "new-password", :placeholder => (ddclient.persisted? ? 'Saved' : 'Password')} %>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <%= button_tag 'Save', :class => 'col-12 btn btn-lg btn-primary' %>
+        </div>
+        <% if ddclient.persisted? %>
+          <div class="row">
+            <div class="col-12">
+              <hr>
+            </div>
+          </div>
+        <% end %>
+      </fieldset>
+    <% end %>
+  <% end %>
+</div>

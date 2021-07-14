@@ -1,0 +1,99 @@
+<% if @current_account_or_token.permits_port_forwards? %>
+  <div class="row">
+    <div class='col-12'>
+      <h2>Port Forwarding</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <p>
+        Currently assigned public IP:
+        <strong><%= @current_account_or_token.nat_assignments.first.try(:nat_ip) || 'Unknown' %></strong>
+      </p>
+    </div>
+  </div>
+  <% if @current_account_or_token.is_virtual_gateway? %>
+    <div class="row">
+      <div class='col-12'>
+        <h3>Manual Port Forwards</h3>
+      </div>
+    </div>
+    <% @device_port_forwards.reject(&:upnp?).each do |pf| %>
+      <div class="row">
+        <div class="col-12">
+          <%= render :partial => 'device_port_forwards_form', :locals => {:pf => pf} %>
+        </div>
+      </div>
+    <% end %>
+    <% if @device_port_forwards.any? %>
+      <hr>
+    <% end %>
+    <div class="row">
+      <div class="col-12">
+        <%= render :partial => 'device_port_forwards_form', :locals => { :pf => DevicePortForward.new(account: @current_account_or_token) } %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @current_account_or_token.upnp_permitted? %>
+    <div class="row">
+      <div class="col-12">
+        <h3>UPnP</h3>
+        <p>
+          Enabling UPnP allows devices registered to your account to automatically request port forwarding rules as needed in order to allow inbound connectivity from the Internet. This feature is required for some gaming systems in order to achieve "Open NAT"
+          or "Type 2 NAT", which improves game match-making, chat, and hosting abilities.
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <%= form_for(@current_account_or_token, :as => :current_account, :url => { :action => :current_account_update }, :html => { :style => 'display: inline;', :name => 'upnp', :id => 'upnp' }) do |f| %>
+          <strong>UPnP Enabled</strong>&nbsp;
+          <%= f.check_box 'upnp_enabled' %>
+          <%= f.submit 'Save', { :style => 'display: none', :class => 'btn btn-lg btn-primary' } %>
+        <% end %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 justify-content-between d-flex align-items-center">
+        <h4 class="align-middle d-inline mb-0">UPnP Port Forwards</h4>
+        <a class="collapser btn btn-sm btn-primary collapsed align-middle d-inline-block" data-toggle="collapse" href="#UPnPCollapse" role="button" aria-expanded="false" aria-controls="activeDevicesCollapse"></a>
+      </div>
+    </div>
+    <div class="row collapse" id="UPnPCollapse">
+      <div class="col-12">
+        <% if @device_port_forwards.select(&:upnp?).any? %>
+          <% @device_port_forwards.select(&:upnp?).each do |pf| %>
+            <%= render :partial => 'device_port_forwards_form', :locals => {:pf => pf} %>
+          <% end %>
+        <% else %>
+          No active UPnP port forwarding rules
+        <% end %>
+        <hr>
+
+        <% @current_account_or_token.device_port_forwards.where.not(device: nil).each do |dpf| %>
+          <% params[:dpf_id] = dpf.id %>
+          <%= render_dashboard_dialogs(:port_forward_summary) %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% elsif @usage_plans.select{|p| p.permits_port_forwards?}.any? %>
+  <div class="row">
+    <div class="col-12">
+      <p>Your account does not support UPnP or managing port forwarding.</p>
+      <p>Visit the
+        <%= link_to 'usage plans', {action: :usage_plan_list} %>
+        page to upgrade your plan.</p>
+    </div>
+  </div>
+<% end %>
+
+<script>
+  $(function () {
+    $('#current_account_upnp_enabled').on('change', function (e) {
+      console.log('toggled');
+      $(this).next('input[type="submit"]').show();
+    })
+  })
+</script>

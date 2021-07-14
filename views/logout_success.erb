@@ -1,0 +1,15 @@
+
+  <div class='row'>
+    <h2 class="col-12 text-center"><%= t('.header') %></h2>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <p class="text-center"> <%= t('.logout_ok') %> </p>
+    </div>
+    <div class="col-12">
+      <p class="text-center"> <%= t('.visit_again') %> </p>
+    </div>
+    <div class="col-12 text-center">
+      <%= link_to 'Back to Login', { :action => :index }, { :class => 'btn btn-lg btn-primary' } %>
+    </div>
+  </div>

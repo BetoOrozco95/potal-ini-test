@@ -1,0 +1,172 @@
+// JavaScript assets manifest for this custom portal.
+//
+// jQuery framework:
+//= require jquery
+//= require jquery_ujs
+//
+// Graphing libraries:
+//= require jquery.fileDownload
+//= require shared/d3.v3.min
+//= require shared/nv.d3.min
+//= require shared/charting
+//= require shared/dashboard
+//= require shared/chartist.min
+//= require ./graphing
+//
+// Gauges
+//= require shared/raphael-2.1.4.min
+//= require shared/justgage.min
+//
+// Bootstrap
+//= require moment
+//= require ./bootstrap.bundle.min
+//= require bootstrap-datetimepicker
+//
+// Datatables
+//= require ./datatables.min
+//
+// Offcanvas Navbar
+//= require ./offcanvas
+//
+//
+// Graph overrides
+//= require ./graphs
+//
+// Time Sensitive Stuff
+//= require ./time
+//
+
+
+let scrollPosition = 0
+let ticking = false
+
+function updateTotalPrice() {
+  $(".usage-plan-content:visible").each(function(){
+    var totals = $(this).find(".price_display:visible, .included_price_element")
+                        .map(function( i, element ) {
+                          return Number($(element).data('price')) || 0;
+                        })
+                       // .filter(function() {
+                       //   return !(isNaN(this));
+                       // });
+    total = 0;
+    for (var i = totals.length - 1; i >= 0; i--) {
+      total += totals[i];
+    }
+
+    var credit = Number($(this).find(".credit-price-element").data('credit')) || 0;
+    var old_total = total;
+    total -= credit;
+
+    var total_string;
+
+    if (total <= 0) {
+      total = 0;
+      total_string = total.toFixed(2) + ' (' + old_total.toFixed(2) + ' from credit)';
+    } else if (total == 0) {
+      total_string = 'free';
+      if (credit > 0) { total_string += ' (from credit)' }
+    } else if (credit > 0) {
+      total_string = total.toFixed(2) + ' (' + credit.toFixed(2) + ' from credit)';
+    } else {
+      total_string = total.toFixed(2);
+    }
+
+    $(this).find(".total_price").html(total_string);
+  })
+
+}
+
+function setGreetingOpacity(scrollPosition) {
+  const percent = ((scrollPosition / $(window).height()))
+  $('.welcome, #hero-rotator, .scroller').fadeTo(0, Math.max(0, (1 - percent * 3)))
+  if (scrollPosition > 0) {
+    $('.scroller').removeClass('bouncer')
+  } else {
+    $('.scroller').addClass('bouncer')
+  }
+}
+
+function defaultGreetingOpacity() {
+  if ($(window).width() >= 992) {
+    window.requestAnimationFrame(function (){
+      setGreetingOpacity(0)
+      ticking = false;
+    })
+  } else {
+    window.requestAnimationFrame(function (){
+      setGreetingOpacity($(window).scrollTop())
+      ticking = false;
+    })
+  }
+}
+
+function handlePlanAddonSliderMouseMoveChanged(e) {
+  $(this).closest('.plan_addon').find('.slider_quantity_display').html(this.value);
+  var price = $(this).data('fixed-price') || (parseFloat($(this).data('price-per-quantity')) * parseInt(this.value)).toFixed(2)
+  $(this).closest('.plan_addon').find('.slider_price_display').html(price).data('price', price);
+  updateTotalPrice();
+}
+
+function handlePlanAddonSliderChanged(e) {
+  $(this).closest('.plan_addon').find('h4 input[type="checkbox"]').prop('checked', true);
+  updateTotalPrice();
+}
+
+function handlePlanAddonToggleChanged(e) {
+  var selected_opt = $(this).find(":selected")[0];
+  var target = $(selected_opt).data('target');
+  $(this).closest('.price-group').find(".plan_addon").hide();
+  if (target) {
+    $(target).show();
+  }
+  updateTotalPrice();
+}
+
+function handlePreAuthSplashScrolled(e)  {
+  if ($('.main-content>div').first()) {
+    if (!ticking && $(window).width() < 992) {
+      window.requestAnimationFrame(function (){
+        setGreetingOpacity($(document).scrollTop())
+        ticking = false
+      })
+    }
+
+    ticking = true
+  }
+}
+
+function setupEventHandlers() {
+  $('body').on('change mousemove', ".plan_addon_slider", handlePlanAddonSliderMouseMoveChanged);
+  $('body').on('change', ".plan_addon_slider", handlePlanAddonSliderChanged);
+  $('body').on('change', ".plan_addon_toggle", handlePlanAddonToggleChanged);
+  $(window).scroll(handlePreAuthSplashScrolled)
+  $(window).resize(defaultGreetingOpacity)
+}
+
+function initializeUI() {
+  window.charts = window.charts || {}
+  Object.values(window.charts).forEach((chart, index) => {
+    const { graph, isEmpty, graphTime } = chart
+    const { container } = graph
+    const graphContainers = $('.portal-graphs-container')
+    if (isEmpty) {
+      $(container).closest('.chart-container').find('.hide-no-data').hide()
+      $(container).closest('.chart-container').find('.show-no-data').show()
+    } else {
+      $(container).closest('.chart-container').find('.hide-no-data').show()
+      $(container).closest('.chart-container').find('.show-no-data').hide()
+    }
+
+    if (graph) {
+      graph.update()
+    }
+  })
+
+  defaultGreetingOpacity()
+}
+
+$(() => {
+  initializeUI()
+  setupEventHandlers()
+})

@@ -1,0 +1,140 @@
+<fieldset>
+  <div class="form-row">
+    <legend class="col-12 text-center">Account Info</legend>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :login, 'Login', :class => 'sr-only' %>
+      <%= f.text_field :login, :placeholder => 'Login...', :class => 'form-control form-control-lg' %>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :password, 'Password', :class => 'sr-only' %>
+      <%= f.password_field :password, :placeholder => 'Password...', :class => 'form-control form-control-lg' %>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :password_confirmation, 'Password Confirmation', :class => 'sr-only' %>
+      <%= f.password_field :password_confirmation, :placeholder => 'Confirmation...', :class => 'form-control form-control-lg' %>
+    </div>
+  </div>
+</fieldset>
+<fieldset>
+  <div class="form-row">
+    <legend class="col-12 text-center">Name</legend>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :first_name, 'First Name', :class => 'sr-only' %>
+      <%= f.text_field :first_name, :placeholder => 'First Name...', :class => 'form-control form-control-lg' %>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :last_name, 'Last Name', :class => 'sr-only' %>
+      <%= f.text_field :last_name, :placeholder => 'Last Name...', :class => 'form-control form-control-lg' %>
+    </div>
+  </div>
+  <% if @validation_plans.select { |p| p.validation_method =~ /email/ }.any? %>
+    <div class="form-row">
+      <div class="form-group col-12" id="email_verification_notice">You will receive a verification code by email prior to account activation.</div>
+    </div>
+  <% end %>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :email, 'Email', :class => 'sr-only' %>
+      <%= f.email_field :email, :placeholder => 'Email...', :class => 'form-control form-control-lg' %>
+    </div>
+  </div>
+  <!--
+  <div class="form-row">
+    <div class="form-group col-12">
+    <%= f.label :email2, 'Email 2', :class => 'sr-only' %>
+      <%= f.email_field :email2, :placeholder => 'Email 2...', :class => 'form-control form-control-lg' %>
+    </div>
+    </div>
+    -->
+</fieldset>
+<fieldset>
+  <div class="form-row">
+    <legend class="col-12 text-center">Address</legend>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :address1, 'Address 1', :class => 'sr-only' %>
+      <%= f.text_field :address1, :placeholder => 'Address 1...', :class => 'form-control form-control-lg' %>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :address2, 'Address 2', :class => 'sr-only' %>
+      <%= f.text_field :address2, :placeholder => 'Address 2...', :class => 'form-control form-control-lg' %>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-3">
+      <%= f.label :city, 'City', :class => 'sr-only' %>
+      <%= f.text_field :city, :placeholder => 'City...', :class => 'form-control form-control-lg' %>
+    </div>
+    <div class="form-group col-3">
+      <%= f.label :region, 'State', :class => 'sr-only' %>
+      <%= f.text_field :region, :placeholder => 'State...', :class => 'form-control form-control-lg' %>
+    </div>
+    <div class="form-group col-3">
+      <%= f.label :zip, 'Zip', :class => 'sr-only' %>
+      <%= f.text_field :zip, :placeholder => 'Zip...', :class => 'form-control form-control-lg' %>
+    </div>
+  </div>
+  <% if @validation_plans.select { |p| p.validation_method =~ /sms/ }.any? %>
+    <div class="form-row">
+      <div class="form-group col-12" id="phone_verification_notice">
+        You will receive an SMS message with a verification code prior to account activation.
+      </div>
+    </div>
+  <% end %>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :country, 'Country', :class => 'sr-only' %>
+      <%= f.localized_country_select(:country, priority_countries=['US', 'CA'], {}, { :class => 'form-control form-control form-control-lg', :required => true }) %>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-12">
+      <%= f.label :phone, 'Phone', :class => 'sr-only' %>
+      <%= f.text_field :phone, :placeholder => 'Phone Number...', :class => 'form-control form-control-lg', :required => true %>
+    </div>
+  </div>
+</fieldset>
+<% if @captive_portal.try(:allow_password_reset?, :secret) %>
+  <fieldset>
+    <div class="form-row">
+      <legend class="col-12 text-center">Account Recovery</legend>
+    </div>
+    <%= fields_for(@secret_question) do |f| %>
+      <div class="form-row">
+        <div class="form-group col-12">
+          <%= f.label :id, "Secret Question",  :class => 'sr-only' %>
+          <%= f.select(:id,
+          SecretQuestion.all.collect {|f| [ f.question, f.id ] },
+          { :prompt => 'Secret Question' }, { :class => 'form-control form-control form-control-lg' }) %>
+        </div>
+      </div>
+    <% end %>
+    <div class="form-row">
+      <div class="form-group col-12">
+        <%= fields_for(@secret_answer) do |f| %>
+          <%= f.label :anser, 'Answer', :class => 'sr-only' %>
+          <%= f.text_field :answer, :placeholder => 'Answer...', :class => 'form-control form-control-lg' %>
+        </div>
+      </div>
+    <% end %>
+  </fieldset>
+<% end %>
+<fieldset>
+  <div class="form-row">
+    <legend class="col-12 text-center">Terms and Conditions</legend>
+  </div>
+  <%= render :partial => 'terms_checkbox' %>
+</fieldset>

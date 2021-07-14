@@ -1,0 +1,21 @@
+
+  <div class="row">
+    <%= form_for( @account, :as => :account, :url => { :action => :account_create },
+      :html => { :name => 'account_form', :id => 'account_form' }) do |f| %>
+      <fieldset>
+        <div class="form-row">
+          <legend class="col-12 text-center">Sign Up</legend>
+        </div>
+        <%= render :partial => 'account_form', :locals => { :f => f } %>
+        <%= render :partial => 'terms_checkbox' %>
+        <div class="form-row">
+          <div class="form-group col-12">
+            <%= button_tag('Sign up', :class => 'd-block mx-auto col-6 btn btn-lg btn-primary shadow-sm', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' }) %>
+          </div>
+        </div>
+      </fieldset>
+    <% end %>
+  </div>
+  <div class="row">
+    <%= error_messages_for :account %>
+  </div>

@@ -1,0 +1,29 @@
+<%
+  # Select random rotatee(s) for the given URN
+  rotator_logs = pick_rotatees(urn: urn.to_s, count: count ||= 1)
+%>
+
+<% if rotator_logs.any? %>
+
+  <div class='container-fluid'>
+    <div class="row">
+
+      <% rotator_logs.in_groups_of(3, false) do |group| %>
+        <% group.each do |rotator_log| %>
+        <%
+          rotatee = rotator_log.rotatee
+          payload = rotatee.payload.html_safe
+          clickable = !rotatee.url.blank?
+        %>
+
+          <div class="col-12">
+            <%= link_to(payload, controller: 'portal/default', action: 'convert_impression', impression: rotator_log.id) if clickable %>
+            <%= payload unless clickable %>
+          </div>
+
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+<% end %>

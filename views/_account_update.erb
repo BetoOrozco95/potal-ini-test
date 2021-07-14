@@ -1,0 +1,26 @@
+  <%# if @current_account.errors.empty? %>
+  <%# end %>
+  <div class="row">
+    <div class="col-12">
+      <h2 class="rg-branding-primary">Account Profile</h2>
+    </div>
+
+  </div>
+  <div class="card shadow p-3">
+    <%= form_for( @current_account, :as => :current_account, :url => { :action => :current_account_update },
+      :html => { :name => 'account_form', :id => 'account_form' }) do |f| %>
+      <%= render :partial => 'account_form', :locals => { :f => f } %>
+      <div class="form-row">
+        <div class="form-group col-12">
+          <%= button_tag('Update', :class => 'd-block mx-auto col-6 btn btn-lg btn-primary', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' }) %>
+        </div>
+      </div>
+    <% end %>
+    <% unless @current_account.errors.empty? %>
+      <div class="row">
+        <div class="col-12 text-center">
+          <%= error_messages_for :current_account %>
+        </div>
+      </div>
+    <% end %>
+  </div>

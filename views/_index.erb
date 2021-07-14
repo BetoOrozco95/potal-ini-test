@@ -1,0 +1,5 @@
+<% if @logged_in %>
+  <%= render :partial => 'session_info_complete' %>
+<% else %>
+  <%= render_portal_partial 'splash' %>
+<% end %>

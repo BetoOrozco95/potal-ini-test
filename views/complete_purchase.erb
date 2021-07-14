@@ -1,0 +1,6 @@
+<h2>Complete your purchase</h2>
+
+In order to complete your purchase, you need to authorize it with your card issuer.
+<br><br>
+<%= link_to 'Retry', request.query_parameters.merge({retry: true}),
+      {:class => 'd-block mx-auto col-6 btn btn-lg btn-primary'} %>

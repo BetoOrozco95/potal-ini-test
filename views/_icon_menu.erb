@@ -1,0 +1,118 @@
+<%
+  show_text ||= false
+  contrast ||= false
+  svg_class = "mx-auto d-block recolor-svg icon #{'contrast' if contrast}"
+  link_class = "mx-auto text-center #{'contrast' if contrast} text-decoration-none"
+  badge_classes = [
+    'right:5%;bottom:10%',
+    'right:5%;top:10%',
+    'left:5%;bottom:10%',
+    'left:5%;top:10%',
+  ]
+  background_classes = {
+    success: 'badge-success',
+    danger: 'badge-danger',
+    warning: 'badge-warning',
+    info: 'badge-info',
+    primary: 'badge-primary',
+    secondary: 'badge-secondary',
+    light: 'badge-light',
+    dark: 'badge-dark'
+  }
+  actions = []
+  can_manage_devices = @current_account_or_token.try(:can_manage_devices?)
+  actions << {
+    name: 'account_info',
+    text: 'Profile',
+    image: 'profile_icon_sm.svg',
+    visible?: @current_account && !@current_account.pms_room,
+  }
+%>
+
+<%
+  if can_manage_devices
+    devices = @current_account_or_token.devices.portal_visible.count
+    max_devices = @current_account_or_token.max_devices ||= 0
+    device_percent = @current_account_or_token.unlimited_devices? ? 100 : (devices / max_devices.to_f) * 100
+    device_background = @current_account_or_token.unlimited_devices? ? 'badge-primary' : device_percent > 90 ? 'badge-danger': device_percent > 66 ? 'badge-warning' : 'badge-success'
+    device_should_badge = devices > 0
+    actions << {
+      name: 'manage_devices',
+      text: 'Devices',
+      image: 'devices.svg',
+      visible?:  @current_account_or_token.try(:can_manage_devices?),
+    }
+  end
+
+  [
+    {
+      name: 'usage',
+      text: 'Usage',
+      image: 'usage.svg',
+      visible?: @current_account_or_token,
+    },
+    {
+      name: 'billing',
+      text: 'Billing',
+      image: 'cc_chip.svg',
+      visible?: @current_account && !@current_account.pms_room,
+      constrain_width?: true,
+    },
+    {
+      name: 'usage_plan_list',
+      text: 'Plans',
+      image: 'dollar_sign.svg',
+      visible?: @current_account && !@usage_plans.empty?,
+      constrain_width?: true,
+    },
+    {
+      name: 'login_session_destroy',
+      text: 'Logout',
+      image: 'logout.svg',
+      visible?: (@login_session && ! @login_session.try(:account)) || (@current_account_or_token && @current_account_or_token.lock_devices == false)
+    }
+  ].each { | action |
+    actions << action
+  }
+%>
+
+<nav class="d-flex flex-column flex-md-row flex-lg-column justify-content-around align-items-center icon-menu">
+  <div class="d-none d-lg-flex my-2 p-3 mx-auto h3 position-relative align-items-center rounded">
+    <%= link_to (portal_inline_svg 'default_icon.svg'), { action: :index }, { class: "#{svg_class} w-100" } %>
+  </div>
+  <% actions.each do |action| %>
+    <%
+      next unless action[:visible?]
+      # TODO: The rest of the svg's to partials
+      action_image = action[:image] == 'devices.svg' || action[:image] == 'usage.svg' ? render(partial: action[:image], locals: {
+        bars: get_dialog_data(:device_session_summary)[:bars],
+        contrast: contrast,
+        icon: true,
+        svg_class: svg_class,
+      }).html_safe : portal_inline_svg(action[:image], class: svg_class)
+      is_current_action = action_name == action[:name]
+    %>
+    <div class="my-2 p-0 w-100 mx-auto d-flex align-items-center rounded <%= 'active shadow-sm' if is_current_action %> icon-item">
+      <%= link_to( {:action => action[:name]}, {:class => "#{link_class}"} ) do %>
+      <div class="h3 p-3 position-relative mx-auto w-100">
+          <%= action_image %>
+          <% if show_text && action[:text].present? %>
+            <% if is_current_action %>
+              <span class="rg-branding-primary icon-link d-block mx-auto text-center"><%= action[:text] %></span>
+            <% else %>
+
+              <%= link_to action[:text], { :action => action[:name].to_s }, { :class => "#{link_class} icon-link" } %>
+            <% end %>
+          <% end %>
+        <% action[:badges].to_a.first(4).each_with_index do | badge, index | %>
+          <% if badge[:text].present? %>
+            <span class="badge badge-pill <%= background_classes[badge[:background_class] || :primary] %> position-absolute" style="<%= badge_classes[index] %>">
+              <%= badge[:text] %>
+            </span>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+    </div>
+  <% end %>
+</nav>

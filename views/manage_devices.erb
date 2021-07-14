@@ -1,0 +1,261 @@
+<div class="card shadow p-3">
+<div class="row">
+  <div class="col-9">
+    <h2 class="rg-branding-primary">Devices</h2>
+  </div>
+</div>
+<div class="row mb-4">
+  <div class="col-12">
+    <% dialog = get_dialog_data(:device_session_summary) %>
+    <%= render :partial => dialog_partial_path("progress_bars"),
+        :locals => { bars: dialog[:progress_bars][:bars] } %>
+  </div>
+</div>
+<% unique_ips = @current_account_or_token.unique_ips.length %>
+<% static_ips_available = @current_account_or_token.ips_are_static? && @current_account_or_token.max_dedicated_ips.to_i > 0 %>
+<% show_static_ips = unique_ips > 1 || static_ips_available %>
+<% if unique_ips == 1 %>
+  <div class="row">
+    <div class="col-12 mb-3">
+      <p class="h5">
+        Currently assigned public IP :
+        <strong>
+          <%= @current_account_or_token.nat_assignments.first.try(:nat_ip) || 'Unknown' %>
+        </strong>
+      </p>
+    </div>
+  </div>
+<% end %>
+<div class="row">
+  <div class='col-12'>
+    <h3>Manage Devices</h3>
+  </div>
+</div>
+<div class="row mb-4">
+  <div class="col-12">
+    <div id="device_list">
+      <% @current_account_or_token.devices.portal_visible.each do |device| %>
+        <%= render :partial => 'device_detail_modal', :locals => {device: device} %>
+        <%= render :partial => 'confirm_delete_device_modal', :locals => {device: device} %>
+      <% end %>
+      <a id="toggle-macs" class="d-none d-md-inline toggle-vis" data-column="2">Show MAC Addresses</a>
+      <span class="d-none d-md-inline">&nbsp;•&nbsp</span>
+      <a id="toggle-vendors" class="d-none d-md-inline toggle-vis" data-column="3">Hide Device Vendors</a>
+      <table id="device-table" class="table table-sm table-striped w-100">
+        <thead>
+          <tr>
+            <th data-orderable="false" data-priority="1"></th>
+            <th data-priority="1">
+              <small>Name</small>
+            </th>
+            <th data-priority="1">
+              <small>MAC Address</small>
+            </th>
+            <th data-priority="4">
+              <small>Vendor</small>
+            </th>
+            <% if show_static_ips %>
+              <th data-priority="3">
+                <small>External IP</small>
+              </th>
+            <% end %>
+            <th data-priority="2">
+              <small><%= 'Internal ' if show_static_ips %>IP</small>
+            </th>
+            <th data-priority="5">
+              <small>Port Forwards</small>
+            </th>
+            <th data-orderable="false" data-priority="1"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @current_account_or_token.devices.portal_visible.each do |device| %>
+            <%= render :partial => 'device_detail_row', :locals => { device: device } %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="row mb-4">
+  <div class="col-12">
+    <% if ! @current_account_or_token.unlimited_devices? && @current_account_or_token.max_devices <= @current_account_or_token.devices.portal_visible.count %>
+      <p>
+        Your account
+        <strong>does not support any additional configured devices.</strong>
+        Please delete at least one configured device below if you wish to add a different one.
+      </p>
+    <% else %>
+      <%= render :partial => 'add_device_form' %>
+    <% end %>
+  </div>
+</div>
+
+<% deviceless_sessions = @current_account_or_token.login_sessions.where('mac IS NULL OR mac NOT IN (?)', @current_account_or_token.devices.map(&:mac)) %>
+<% if deviceless_sessions.any? %>
+  <div class="row mb-5">
+    <div class="col-12 justify-content-between d-flex align-items-center">
+      <h3 class="d-inline mb-0">Sessions Without a Device</h3>
+      <a id="sessionlessCollapser" class="collapser btn btn-sm btn-primary align-middle d-inline-block" data-toggle="collapse" href="#sessionlessDevicesCollapse" role="button" aria-expanded="false" aria-controls="mediaConverterCollapse"></a>
+    </div>
+  </div>
+  <div class="row mb-4"  id="sessionlessDevicesCollapse">
+    <div class="col-12">
+      <table id="sessionless-device-table" class="table table-sm table-striped w-100">
+        <thead>
+          <tr>
+            <th data-priority="1" data-orderable="false"></th>
+            <th data-priority="4"><small>Login Time</small></th>
+            <th data-priority="2"><small>IP address</small></th>
+            <th data-priority="3"><small>Browser</small></th>
+            <th data-priority="1" data-orderable="false"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% deviceless_sessions.each do |ls| %>
+            <%= render :partial => 'session_detail_row', :locals => {ls: ls} %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% end %>
+
+<!-- sessionless devices manage_devices_section -->
+
+<% if @current_account_or_token.media_converters.portal_visible.exists? %>
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="row mb-2">
+        <div class="col-12 justify-content-between d-flex align-items-center">
+          <h4 class="align-middle d-inline mb-0">Media Converter Equipment</h4>
+          <a class="collapser btn btn-sm btn-primary align-middle d-inline-block" data-toggle="collapse" href="#mediaConverterCollapse" role="button" aria-expanded="false" aria-controls="mediaConverterCollapse"></a>
+        </div>
+      </div>
+      <div class="row" id="mediaConverterCollapse">
+        <% @current_account_or_token.media_converters.portal_visible.each do |media_converter| %>
+          <div class="device_summary_row col-12">
+            <span class="device_header"><%= media_converter.name %></span>
+            <div class="detail_row">
+              <%= render :partial => 'media_converter_detail_row', :locals => {media_converter: media_converter} %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- media converters manage_devices_section -->
+<% end %>
+  <!-- device_list -->
+<%= render partial: 'lan_parties' %>
+<%= render partial: 'wireless' %>
+
+<script>
+  $(document).ready( function () {
+    const deviceTable = $('#device-table').DataTable({
+      responsive: true,
+      order: [
+        [3,"desc"],
+        [1,"asc"],
+      ],
+      drawCallback: function () {
+        const pageMin = 10;
+        const api = this.api();
+        const pages = api.page.info().pages;
+        const rows = api.data().length;
+        const dataTable = $('#device-table')
+
+        // Tailor the settings based on the row count
+        if(rows <= pageMin){
+            // Not enough rows for really any features, hide filter/pagination/length
+            dataTable
+                .next('.dataTables_info').css('display','none')
+                .next('.dataTables_paginate').css('display','none');
+
+            dataTable
+                .prev('.dataTables_filter').css('display', 'none')
+                .prev('.dataTables_length').css('display', 'none')
+        } else if(pages === 1){
+            // With this current length setting, not more than 1 page, hide pagination
+            dataTable
+                .next('.dataTables_info').css('display','none')
+                .next('.dataTables_paginate').css('display','none');
+        } else {
+            // SHow everything
+            dataTable
+                .next('.dataTables_info').css('display','block')
+                .next('.dataTables_paginate').css('display','block');
+        }
+      },
+    });
+
+    deviceTable.column(2).visible(false);
+
+    $('#sessionless-device-table').DataTable({
+      responsive: true,
+      columnDefs: [
+        {
+          orderable: false,
+          targets: 0,
+          responsivePriority: 1,
+
+        },
+        {
+          targets: 2,
+          responsivePriority: 2,
+        },
+        {
+          orderable: false,
+          targets: -1,
+          responsivePriority: 1,
+        },
+      ],
+      drawCallback: function () {
+        const pageMin = 10;
+        const api = this.api();
+        const pages = api.page.info().pages;
+        const rows = api.data().length;
+        const dataTable = $('#sessionless-device-table')
+
+        // Tailor the settings based on the row count
+        if(rows <= pageMin){
+            // Not enough rows for really any features, hide filter/pagination/length
+            dataTable
+                .next('.dataTables_info').css('display','none')
+                .next('.dataTables_paginate').css('display','none');
+
+            dataTable
+                .prev('.dataTables_filter').css('display', 'none')
+                .prev('.dataTables_length').css('display', 'none')
+        } else if(pages === 1){
+            // With this current length setting, not more than 1 page, hide pagination
+            dataTable
+                .next('.dataTables_info').css('display','none')
+                .next('.dataTables_paginate').css('display','none');
+        } else {
+            // SHow everything
+            dataTable
+                .next('.dataTables_info').css('display','block')
+                .next('.dataTables_paginate').css('display','block');
+        }
+      },
+    });
+
+    $('a.toggle-vis').on( 'click', function (e) {
+      e.preventDefault();
+      // Get the column API object
+      const column = deviceTable.column( $(this).attr('data-column') );
+      // Toggle the visibility
+      const visible = column.visible()
+      const title = $(e.target).html().split(' ').slice(1).join(' ')
+      $(e.target).html(`${visible ? 'Show' : 'Hide'} ${title}`)
+      column.visible(!visible);
+    });
+  });
+
+  $(() => {
+    $('#sessionlessCollapser').addClass('collapsed')
+    $('#sessionlessDevicesCollapse').addClass('collapse')
+  })
+</script>

@@ -1,0 +1,71 @@
+<div class='col-12 p-md-2'>
+    <% if @login_session %>
+        <% if @login_session.online? %>
+            <div class="card shadow my-3 my-md-4 col-12 mx-auto session-info">
+                <div class="col-12 d-md-flex flex-md-row flex-wrap">
+                    <div class="col-12 col-md-6 col-lg-3 d-flex flex-column mx-auto">
+                        <%= portal_inline_svg 'wireless_signal.svg', :class => 'mx-auto d-block recolor-svg' %>
+                        <p class="text-center pt-4">You are online and connected to the internet.</p>
+                        <% if @login_session.shared_credential_group %>
+                            <p class='text-center'><strong><%= @login_session.shared_credential_group.motd %></strong></p>
+                    <% end %>
+                    </div>
+                    <% if @login_session.usage_bytes_down_remaining %>
+                        <div class="col-12 col-md-6 col-lg-3 d-flex flex-column mx-auto">
+                            <div class="d-flex flex-column">
+                                <%= portal_inline_svg 'download.svg', :class => 'mx-auto d-block recolor-svg' %>
+                                <p class="text-center pt-4">You can transfer up to:
+                                    <strong>
+                                    <%= number_to_human_size(@login_session.usage_bytes_down_remaining) %>
+                                        download.
+                                    </strong>
+                                </p>
+                            </div>
+                        </div>
+                    <% end %>
+                    <% if @login_session.usage_bytes_up_remaining %>
+                        <div class="col-12 col-md-6 col-lg-3 d-flex flex-column mx-auto">
+                            <div class="d-flex flex-column">
+                                <%= portal_inline_svg 'upload.svg', :class => 'mx-auto d-block recolor-svg' %>
+                                <p class='text-center pt-4'>You can transfer up to:
+                                    <strong>
+                                    <%= number_to_human_size(@login_session.usage_bytes_up_remaining) %>
+                                        upload.
+                                    </strong>
+                                </p>
+                            </div>    
+                        </div>
+                    <% end %>
+                    <% if @login_session.expires_at %>
+                        <div class="col-12 col-md-6 col-lg-3 d-flex flex-column mx-auto">
+                            <%= portal_inline_svg 'time.svg', :class => 'mx-auto d-block recolor-svg' %>
+                            <% if @login_session.online? %>
+                                <p class='text-center'>
+                                    Your online session
+                                    <strong>expires in <%= distance_of_time(@login_session.online_minutes_remaining.minutes, highest_measures: 2) %>
+                                    </strong> on <%= l(@login_session.expires_at) %>.
+                                </p>
+                            <% end %>
+                        </div>
+                    <% else %>
+                        <div class="col-12 col-md-6 col-lg-3 d-flex flex-column mx-auto">
+                            <%= portal_inline_svg 'time.svg', :class => 'mx-auto d-block recolor-svg' %>
+                            <p class="text-center"> Your online session <strong> never expires. </strong> </p>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+        <% else %>
+            <div class="text-center">
+                <span class="h4"> You have no online usage available and will not be able to access the internet. </span>
+                <p class="purchase_more">
+                    <%= link_to 'purchase more usage', {:action => :usage_plan_list}, {:class => 'd-block mx-auto col-6', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' } } %>
+                </p>
+            </div>
+        <% end %>
+    <% else %>
+        <div class="card shadow col-12 col-md-6 mx-auto my-3 my-md-4">
+            <span class='h3'>You are not logged in.</span>
+        </div>
+    <% end %>
+</div>

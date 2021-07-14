@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <% if @wispr_access_location %>
+    <!--
+<?xml version="1.0" encoding="UTF-8"?>
+<WISPAccessGatewayParam xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.acmewisp.com/WISPAccessGatewayParam.xsd">
+  <Redirect>
+    <AccessProcedure>1.0</AccessProcedure>
+    <AccessLocation><%= @wispr_access_location.to_s %></AccessLocation>
+    <LocationName><%= @wispr_location_name.to_s %></LocationName>
+    <LoginURL><%= @wispr_login_url.to_s %></LoginURL>
+    <MessageType>100</MessageType>
+    <ResponseCode>0</ResponseCode>
+  </Redirect>
+</WISPAccessGatewayParam>
+-->
+  <% end %>
+  <head>
+    <title><%= @portal_controller.titleize %> Portal</title>
+    <!-- <title><%= t('.title') %></title> -->
+    <!-- scale properly on mobile devices -->
+    <meta name="viewport" content="initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width">
+    <!-- Link to this custom portal's favicon.ico -->
+    <%= portal_favicon_link_tag %>
+    <!-- Link to this custom portal's portal.css -->
+    <!-- Do not link other stylesheets here, instead add a require line to portal.css.scss.erb -->
+    <%= portal_stylesheet_link_tag %>
+    <!-- Include this custom portal's portal.js -->
+    <!-- Do not include other javascripts here, instead add a require line to portal.js.erb -->
+    <%= portal_javascript_include_tag %>
+    <!-- Include this custom portal's pack.js -->
+    <%= portal_pack_tags %>
+    <!-- cross-site request forgery protection token for forms to use -->
+    <%= csrf_meta_tag %>
+
+    <%= render :partial => 'google_analytics' %>
+  </head>
+  <body class="bg-light d-flex flex-column">
+  <% if session['color_accessibility'] %>
+    <%= render :partial => 'accessibility_styles'%>
+  <% end %>
+  <% if !session[:cookies_accepted] && @captive_portal && @captive_portal.cookie_acceptance_required? %>
+    <%= render :partial => 'cookie_consent' %>
+  <% end %>
+  <div id="wrapper">
+    <div>TEST TEST TEST TEST </div>
+
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm top-nav">
+
+          <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <% if @logged_in %>
+              <button class="navbar-toggler position-absolute" type="button" data-toggle="offcanvas" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon align-top"><i class="fas fa-bars fa-2x"></i></span>
+              </button>
+            <% end %>
+            <div class="navbar-collapse offcanvas-collapse" id="navbarSupportedContent">
+              <div class="row">
+                <div class="col transparent offcanvas-overlay">
+                </div>
+                <div class="col offcanvas-menu">
+                  <ul class="navbar-nav ml-auto font-weight-bold">
+                    <%= render_portal_partial 'menu' %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <%= link_to (portal_inline_svg 'default_icon.svg', :style => 'height: 50px;'), { :action => :index }, { :class => 'navbar-brand mx-auto' } %>
+          </div>
+          <%= link_to "Color&nbsp;Accessibility#{session['color_accessibility'] ? "&nbsp;Mode" : '?'}".html_safe, params.to_unsafe_h.merge(color_accessibility: true), :class => "color-accessibility d-none"%>
+        </nav>
+      <%= render :partial => 'flash', :object => flash %>
+      <main class="container-fluid">
+
+        <%# allow a view to declare content that should be displayed above the
+        normal 2 column layout by using the "content_for :full_width do" block
+        syntax to render the block's content above the traditional 2-column layout %>
+        <% if content_for?(:full_width) %>
+          <div class="row">
+            <div class="col-12">
+              <%= yield(:full_width) %>
+            </div>
+          </div>
+        <% end %>
+        <% if @logged_in %>
+          <div class="row top-nav-padding">
+            <div class="d-none d-md-block col-12 col-lg-2">
+              <%= render partial: 'icon_menu', locals: { show_text: true } %>
+            </div>
+            <div class="col-12 col-lg-10 pr-lg-5 bg-overlay" style="min-height: 100vh;">
+              <%= yield %>
+            </div>
+          </div>
+        <% else %>
+          <div class="row pre-auth-splash">
+            <%= render :partial => 'hero' %>
+            <div class="d-none d-lg-block col-lg-6"></div>
+            <% scroll_splash_page = (action_name == 'index') # make splash content scrolled down %>
+            <div class="col-12 col-lg-6 px-2 px-md-4 px-lg-0 main-content <%= 'splash-content' if scroll_splash_page  %>">
+              <% if scroll_splash_page %>
+                <div class="d-flex justify-content-around d-lg-none mx-auto col-12 scroller bouncer">
+                  <div class="d-flex flex-column justify-content-end chevron">
+                    <i class="fas fa-chevron-up"></i>
+                    <i class="fas fa-chevron-up"></i>
+                  </div>
+                  <div class="d-flex flex-column justify-content-end">
+                    <span>Swipe Up to Log In</span>
+                  </div>
+                  <div class="d-flex flex-column justify-content-end chevron">
+                    <i class="fas fa-chevron-up"></i>
+                    <i class="fas fa-chevron-up"></i>
+                  </div>
+                </div>
+              <% end %>
+              <div class="mx-auto px-2 px-md-4 px-lg-0 pt-5 w-lg-75 rounded-lg login">
+                <%= yield %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </main>
+      <%= render :partial => 'footer' %>
+      <%#= render_portal_partial 'development_bar' %>
+      <% if @effective_portal.try(:require_tos_inline?) %>
+        <%= render :partial => 'terms_modal' %>
+      <% end %>
+    </div>
+  </body>
+</html>

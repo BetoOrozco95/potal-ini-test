@@ -1,0 +1,41 @@
+<aside id="join_lan_party_modal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 class="inline-block">Join a LAN Party</h2>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"><i class="fas fa-times"></i></span>
+        </button>
+      </header>
+      <main class="modal-body">
+        <p class="text-center">
+          <strong>WARNING:</strong> By joining a LAN Party, you are entering the
+          network of another user who will have direct access to your
+          devices. Up-to-date Anti-virus and firewalls are recommended to 
+          protect your devices. Only join a LAN Party of someone you trust.
+        </p>
+        <%= form_tag({action: :join_lan_party}) do %>
+          <fieldset>
+            <div class="form-row">
+              <legend class="col-12 text-center">Join an existing party:</legend>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-12">
+                <%= label_tag :party_password, "Password", { :class => 'sr-only'} %>
+                <%= text_field_tag :party_password, nil, { :class => 'form-control form-control-lg', placeholder: 'Password'} %>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-12">
+                <%= button_tag 'Join', { :class => 'btn btn-lg btn-primary col-md-4'} %>
+              </div>
+            </div>
+          </fieldset>
+        <% end %>
+      </main>
+      <footer class="modal-footer">
+        <button type="button" class="btn btn-lg btn-secondary" data-dismiss="modal">Cancel</button>
+      </footer>
+    </div>
+  </div>
+</aside>

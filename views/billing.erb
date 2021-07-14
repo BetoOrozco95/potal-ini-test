@@ -1,0 +1,77 @@
+<div class="row">
+  <div class="col-12">
+    <h2 class="rg-branding-primary">Billing</h2>
+  </div>
+</div>
+<% if @current_account.bill_at && @current_account.usage_plan && !@current_account.usage_plan.price_free? %>
+  <% if @current_account.bill_at > Time.now %>
+    <div class="row">
+      <div class='col-12'>
+        <p class="text-center">Your stored <%= link_to 'payment method', { :action => :payment_method_edit } %> will be automatically charged on <%= @current_account.bill_at.strftime("%A, %b %d %Y") %>.</p>
+      </div>
+    </div>
+  <% elsif @current_account.bill_at < Time.now %>
+    <div class="row">
+      <div class='col-12'>
+        <h3 class="text-center">Your account failed to automatically recharge on <%= @current_account.bill_at.strftime("%A, %b %d %Y") %>. Please review your <%= link_to 'payment method', { :action => :payment_method_edit } %> to ensure continued access.</h3>
+      </div>
+    </div>
+  <% end %>
+<% end %>
+<div class="row">
+  <div class="col-12">
+    <%= render :partial => 'prorated_credit' %>
+    <%= render :partial => 'invoices' %>
+  </div>
+</div>
+<% if @current_account.bill_at.present? %>
+  <div class="row">
+    <div class="col-12">
+      Next billing date: <%= @current_account.bill_at %>
+    </div>
+    </div>
+<% end %>
+<div class="card shadow p-3">
+  <div class="row">
+    <div class="col-12">
+      <%= render :partial => 'current_usage_plan' %>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 text-center">
+      <div class="row">
+      <%= link_to 'Edit Payment Method', { :action => :payment_method_edit },
+        { :class => 'd-block mx-auto col-10 col-6 col-md-3 my-2 btn btn-lg btn-primary', :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' } %>
+      <% if @current_account &&
+            @current_account.usage_plan.try(:recurring_method) != "none" &&
+            @current_account.bill_at.nil? %>
+        <%= link_to 'Recurring Billing Disabled', { :action => :usage_plan_list },
+          { :class => 'd-block mx-auto col-10 col-md-3 my-2 btn btn-lg btn-secondary' } %>
+      <% elsif @current_account.bill_at.present? %>
+        <%= link_to 'Cancel Recurring Billing',
+            { :action => :cancel_recurring_payments}, {
+              :class => 'd-block mx-auto col-10 col-md-3 my-2 btn btn-lg btn-danger',
+              :data => {
+                :confirm => 'This will disable recurring payments, and you may continue to use the network until your usage has expired.  Are you sure you wish to continue?',
+                :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' } } %>
+      <% end %>
+      <% if Coupon.first %>
+        <%= link_to 'Redeem a Coupon', { :action => :coupon }, { :class => 'd-block mx-auto col-10 col-md-3 my-2 btn btn-lg btn-primary' } %>
+      <% end %>
+    </div>
+    </div>
+  </div>
+</div>
+<div class="row mt-3">
+  <div class="col-12">
+    <h2 class="rg-branding-primary">Usage</h2>
+  </div>
+</div>
+<div class="row card shadow mx-1 p-3">
+  <% unless @current_account_or_token.unlimited_usage_minutes? &&
+          @current_account_or_token.unlimited_usage_mb_down? &&
+          @current_account_or_token.unlimited_usage_mb_up? &&
+          @current_account_or_token.no_usage_expiration? %>
+    <%= render_dashboard_dialogs(:account_usage_summary) %>
+  <% end %>
+</div>

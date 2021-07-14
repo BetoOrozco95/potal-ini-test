@@ -1,0 +1,61 @@
+<div class="row">
+  <div class="col-12 purchase-plan card shadow py-3">
+    <% if @usage_plan.price_free? %>
+      <%= form_for(@payment_method, :url => { :action => :usage_plan_charge, :id => @usage_plan.id },
+        :html => { :name => 'payment_form', :id => 'payment_form' }) do |f| %>
+        <%= render :partial => 'usage_plan', :object => @usage_plan %>
+        <p class="text-center">
+          Click Continue below to obtain this plan at no charge.
+        </p>
+
+          <%= button_tag('Continue', :class => 'd-block mx-auto col-6 btn btn-lg btn-primary', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' }) %>
+
+      <% end %>
+    <% elsif @merchant && @merchant.direct_gateway? %>
+      <%= form_for(@payment_method, :url => { :action => :usage_plan_charge, :id => @usage_plan.id },
+        :html => {
+          :name => 'payment_form',
+          :id => 'payment_form',
+          :onsubmit =>
+              (
+                'return stripeFormOnSubmit()' if @payment_method.is_stripe_token? ||
+                @usage_plan.is_stripe?
+              )
+         }.reject{|k,v| v.nil?}) do |f| %>
+        <%= render :partial => 'usage_plan', :object => @usage_plan %>
+        <%= render :partial => 'payment_method_form', :locals => { :f => f } %>
+        <p class="text-center">
+          Click the Purchase button below to <strong> immediately charge
+            <%= @usage_plan.price_display %> </strong> to the payment method
+          specified above.
+        </p>
+        <div>
+          <%= button_tag('Purchase', :class => 'd-block mx-auto col-6 btn btn-lg btn-primary shadow-sm', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' }) %>
+        </div>
+      <% end %>
+    <% elsif @pms_server %>
+      <%= form_tag({:action => :usage_plan_charge, :id => @usage_plan.id}, {:id => 'pms_payment_form'}) do %>
+        <%= render :partial => 'usage_plan', :object => @usage_plan %>
+        <fieldset>
+          <legend class="col-12 text-center">
+            Please enter your reservation information and click the Purchase button
+            below to <strong> immediately charge <%= @usage_plan.price_display %> to
+              your room</strong>.
+          </legend>
+          <div>
+            <%= text_field_tag 'pms_credential_a', @current_account.first_name, :placeholder => 'Room Number...', :class => 'form-control form-control-lg' %>
+          </div>
+          <div>
+            <%= text_field_tag 'pms_credential_b', @current_account.last_name, :placeholder => @pms_server.second_credential == 'G#' ? 'Guest Number...' : 'Last Name...', :class => 'form-control form-control-lg' %>
+          </div>
+          <div>
+            <%= button_tag('Purchase', :class => 'd-block mx-auto col-6 btn btn-lg btn-primary shadow-sm', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' }) %>
+          </div>
+        </fieldset>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="col-12">
+    <%= error_messages_for :payment_method %>
+  </div>
+</div>

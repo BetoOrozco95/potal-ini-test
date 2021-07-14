@@ -1,0 +1,18 @@
+<%= form_tag({:action => :redeem_coupon}, {:id => 'redeem_coupon'}) do %>
+  <fieldset>
+    <div class="form-row">
+      <legend class="col-12 text-center">Enter Code</legend>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-12">
+        <%= label_tag 'code', 'Code', :class=> 'sr-only' %>
+        <%= text_field_tag 'code', params[:code], :placeholder => 'Code...', :class => 'form-control form-control-lg' %>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-12">
+        <%= button_tag('Redeem', :class => 'd-block mx-auto col-6 btn btn-lg btn-primary shadow-sm', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' }) %>
+      </div>
+    </div>
+  </fieldset>
+<% end %>

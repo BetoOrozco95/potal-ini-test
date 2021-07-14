@@ -1,0 +1,29 @@
+<%= form_tag({:action => :pms_guest_login}, {:id => 'pms_guest_login'}) do %>
+  <fieldset>
+    <div class="form-row">
+      <legend class="col-12 text-center">Room Login</legend>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-12">
+        <%= render :partial => 'terms_checkbox' %>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-12">
+        <label class="sr-only" for="RN">Room Number</label>
+        <%= text_field_tag 'RN', params[:RN], :title => 'Room Number', :placeholder => 'Room Number...', :class => 'form-control form-control-lg' %>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-12">
+        <label class="sr-only" for="GN">Last Name</label>
+        <%= text_field_tag 'GN', params[:GN], :title => 'Last Name', :placeholder => 'Last Name...', :class => 'form-control form-control-lg', :autocorrect => :off %>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-12">
+        <%= button_tag('Continue', :class => 'd-block mx-auto col-6 btn btn-lg btn-primary shadow-sm', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' }) %>
+      </div>
+    </div>
+  </fieldset>
+<% end %>

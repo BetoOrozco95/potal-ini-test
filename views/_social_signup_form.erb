@@ -1,0 +1,24 @@
+<%= form_tag({:action => "#{omniauth_strategy.provider_type}_login", :id => omniauth_strategy.id},
+             {:id => "#{omniauth_strategy.provider_type}_login"}) do %>
+  <% if @effective_portal &&
+        @effective_portal.omniauth_strategies.include?(omniauth_strategy) &&
+        # list non-free usage plans tied to this strategy.
+        omniauth_strategy.usage_plans.reject(&:price_free?).any? ) %>
+    <!-- list of available plans -->
+    <fieldset>
+      <legend class="col-12 text-center">Usage Plans</legend>
+      <% omniauth_strategy.usage_plans.sort_by(&:price).each do |usage_plan| %>
+        <div class="form-group col-12">
+          <%= radio_button_tag(:usage_plan_id, usage_plan.id) %>&nbsp;&nbsp;<label for="usage_plan_id_<%= usage_plan.id.to_s%>"><%= h(usage_plan.name) %></label>
+          <span><%= h(usage_plan.price_display) %></span>
+          <%# TODO: implement PlanAddon choices %>
+        </div>
+      <% end %>
+    </fieldset>
+  <% end %>
+  <%= render :partial => 'survey_questions_fields' %>
+  <%= render :partial => 'terms_checkbox' %>
+  <div class="form-group col-12">
+    <%= button_tag(omniauth_strategy.signup_button_text, { :class => omniauth_strategy.button_class } ) %>
+  </div>
+<% end %>

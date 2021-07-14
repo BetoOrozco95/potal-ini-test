@@ -1,0 +1,108 @@
+<div class="row">
+  <div class='col-12'>
+    <h2 class='text-center'>Hello <%= @guest.title %> <%= @guest.name %></h2>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12">
+    <% if @guest.no_post? && @usage_plans.empty? %>
+      <p> You are not allowed to post any charges to your room. </p>
+      <p> If you wish to purchase additional Internet access you must call the
+        front desk and have them enable amenity charge posting to your room. </p>
+    <% else %>
+      <%= form_for(@payment_method, :url => { :action => :quick_purchase_charge },
+        :html => { :name => 'payment_form', :id => 'payment_form', :onsubmit => 'return paymentFormOnSubmit()' }) do |f| %>
+        <%= hidden_field_tag(:method, 'pms') %>
+        <%= hidden_field_tag(:pms_guest_id, @guest.id) %>
+        <%# sometimes a guest can have multiple rooms, we need to use the room that
+         the user originally entered when they started the login process.  i.e.
+         @guest.room could be different than params[:RN].  fallback to @guest if
+         the parameters do not exist %>
+        <%= f.hidden_field :first_name, :value => params[:RN] || @guest.room %>
+        <%= f.hidden_field :last_name,  :value => params[:GN] || @guest.name %>
+        <fieldset>
+          <legend class="col-12 text-center">select your desired connection type</legend>
+          <!-- list of available plans -->
+          <% if @usage_plans.any? %>
+            <% @usage_plans.each do |usage_plan| %>
+              <%
+                # Determine argument values to be passed to the function that modifies the form
+                # based upon the combination of direct/offsite merchants and pms servers associated
+                # with the plan
+
+                direct                      = usage_plan.direct_merchant.present?
+                offsite                     = usage_plan.offsite_merchant.present?
+                pms                         = usage_plan.pms_server.present?
+                free                        = usage_plan.price_free?
+                stripe_token                = usage_plan.is_stripe?
+                cybersource_token           = usage_plan.is_cybersource?
+                token                       = stripe_token || cybersource_token
+                email_validation_supported  = usage_plan.requires_account_validation?(:email)
+                phone_validation_supported  = usage_plan.requires_account_validation?(:sms)
+                onclick_function = sprintf("usagePlanOnclick(this, %s, %s, %s, %s, %s, %s, %s);", direct,offsite,pms,free,token,email_validation_supported,phone_validation_supported)
+                onclick_function = nil unless @paid_plans.any? || usage_plan.requires_account_validation?
+              %>
+
+              <div class="form-row">
+                <div class="form-group col-12">
+                  <%= radio_button(:usage_plan, :id, usage_plan.id,
+                      :onclick => onclick_function,
+                      :data => {
+                        :direct            => direct,
+                        :offsite           => offsite,
+                        :pms               => pms,
+                        :free              => free,
+                        :stripe_token      => stripe_token,
+                        :cybersource_token => cybersource_token,
+                        :email_validation_supported => email_validation_supported,
+                        :phone_validation_supported => phone_validation_supported
+                      },
+                      :class => 'sr-only') %>
+                  <label class="col-12 py-2 px-4" for="usage_plan_id_<%=usage_plan.id.to_s%>">
+                    <span class="sr-only" for="usage_plan_id_<%=usage_plan.id.to_s%>">Name: <%= h(usage_plan.name) %> Price: <%= h(usage_plan.price_display) %></span>
+                    <div class=" quick-purchase-plan shadow-sm" aria-hidden>
+                      <%= render :partial => 'usage_plan', :object => usage_plan, :locals => { f: f } %>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            <% end %>
+
+            <div>
+            </div>
+            <div class="col-12 mb-2">
+              <%= label_tag 'email', nil, class: 'sr-only' %>
+              <%= text_field_tag 'email', params[:email], :placeholder => 'Enter Email...', :class => 'form-control form-control-lg d-block mx-auto col-9' %>
+            </div>
+            <div class="col-12">
+              <%= button_tag('Select', :id => 'submit_button', :class => 'd-block mx-auto col-6 btn btn-lg btn-primary' ) %>
+            </div>
+          <% else %>
+            <div class="col-12 text-center">
+              <hgroup>
+                <h3>There are no options available for your stay.</h3>
+                <h4>If you need further assistance please contact the front desk.</h4>
+              </hgroup>
+            </div>
+          <% end %>
+        </fieldset>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+<script type="text/javascript">
+  function paymentFormOnSubmit() {
+
+    var str=document.getElementById('email').value;
+    var filter=/^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i
+
+    if (filter.test(str)) {
+      document.getElementById('submit_button').disabled = true;
+      return true;
+    } else {
+      alert("Please input a valid email address.")
+      return false;
+    }
+
+  }
+</script>

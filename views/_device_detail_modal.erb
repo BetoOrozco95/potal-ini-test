@@ -1,0 +1,138 @@
+<% device_session = @current_account_or_token.login_sessions.find_by(mac: device.mac) %>
+
+<aside id="<%= "device_detail_modal_#{device.id}" %>" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 class="inline-block">Device Info</h2>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"><i class="fas fa-times"></i></span>
+        </button>
+      </header>
+      <main class="modal-body">
+        <table class="table">
+          <tr>
+            <th class="align-middle">
+              Name
+            </th>
+            <td>
+              <%= form_tag 'update_device' do %>
+                <%= fields_for device do |f| %>
+                  <div class="form-row d-flex align-items-center">
+                    <div class="form-group col-9">
+                      <%= f.hidden_field :id %>
+                      <%= f.text_field :name, :class => 'form-control form-control-lg' %>
+                    </div>
+                    <div class="form-group col-3">
+                      <%= button_tag 'Save', :class => 'btn btn-lg btn-primary form-control form-control-lg', :data => {:disable_with => 'Save'} %>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              MAC address
+            </th>
+            <td><%= device.mac %></td>
+          </tr>
+          <% if device.hostname %>
+            <tr>
+              <th>
+                Hostname
+              </th>
+              <td>
+                <%= device.hostname %>
+              </td>
+            </tr>
+          <% end %>
+          <% if device.vendor %>
+            <tr>
+              <th>
+                Device
+              </th>
+              <td>
+                <%= device.vendor %>
+              </td>
+            </tr>
+          <% end %>
+          <% if @current_account_or_token.is_virtual_gateway? %>
+            <tr>
+              <th>
+                DMZ
+              </th>
+              <td>
+                <% confirm = begin
+                               if device.binat?
+                                 "Are you sure you want to deactivate the DMZ for device #{device.mac}?"
+                               elsif @current_account_or_token.devices.where(binat: true).count == @current_account_or_token.max_dedicated_ips
+                                 "Activating the DMZ option for this device will disable it for the previously selected device and deactivate any port forwarding rules defined.  Continue?"
+                               elsif @current_account_or_token.devices.where(binat: true).count >= @current_account_or_token.max_dedicated_ips - 1
+                                 "Activating the DMZ option for this device will disable any port forwarding rules defined.  Continue?"
+                               end
+                             end %>
+                <%= link_to(device.binat? ? 'Deactivate' : 'Activate',
+                      { :action => :update_device_binat, :device_id => device.id },
+                      {
+                        :class => "col-12 btn btn-lg btn-primary #{ 'btn-success' if device.binat? }",
+                        :data => {:disable_with => device.binat? ? 'Deactivating' : 'Activating', :confirm => confirm }
+                      }) %>
+              </td>
+            </tr>
+          <% end %>
+          <% unique_ips = @current_account_or_token.unique_ips.length %>
+          <tr>
+            <th><%= 'Internal ' if unique_ips > 1 %>IP Address</th>
+            <td><%= device_session.try(:ip) || 'Offline' %></td>
+          </tr>
+          <% if unique_ips > 1 %>
+            <tr>
+              <th>External IP Address</th>
+              <td><%= device.public_ip || '–' %></td>
+            </tr>
+          <% end %>
+          <tr>
+            <th>Usage</th>
+            <td><%= link_to('View Usage', {:action => :usage, :device_id => device.id}, {:data => {:disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...'}}) %>
+            </td>
+          </tr>
+          <% if @current_account && @current_account.lock_devices == false %>
+            <tr>
+              <td colspan="2" class="action-cell">
+                <%= link_to 'Delete', "#confirm_delete_device_modal_#{device.id}", {:class => 'btn btn-lg btn-danger', data: {"target" => "#confirm_delete_device_modal_#{device.id}", 'toggle' => 'modal', 'dismiss' => 'modal' } } %>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+        <% if @current_account_or_token.permits_port_forwards? %>
+          <div class="row mb-2">
+            <div class="col-12 justify-content-between d-flex align-items-center">
+              <h4 class="align-middle d-inline mb-0">Device Port Forwards</h4>
+              <a class="collapser btn btn-sm btn-primary collapsed align-middle d-inline-block" data-toggle="collapse" href="#activeDevicesCollapse_<%= device.id %>" role="button" aria-expanded="false" aria-controls="activeDevicesCollapse"></a>
+            </div>
+          </div>
+          <div class="row collapse" id="activeDevicesCollapse_<%= device.id %>">
+            <div class="col-12">
+            <% device.device_port_forwards.each do |pf| %>
+              <div class="row">
+                <%= render :partial => 'device_port_forwards_form', :locals => {:pf => pf} %>
+              </div>
+            <% end %>
+            <% if device.device_port_forwards.any? %>
+              <%# insert a divider to separate the list of existing port forwards from the form to add a new one %>
+              <hr>
+            <% end %>
+              <div class="row">
+                <%= render :partial => 'device_port_forwards_form', :locals => { :pf => DevicePortForward.new(device: device, account: @current_account_or_token) } %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </main>
+      <footer class="modal-footer">
+        <button type="button" class="btn btn-lg btn-secondary" data-dismiss="modal">Cancel</button>
+      </footer>
+    </div>
+  </div>
+</aside>

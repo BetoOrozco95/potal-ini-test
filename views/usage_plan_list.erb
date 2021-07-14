@@ -1,0 +1,72 @@
+<div class='row'>
+  <div class="col-12">
+    <h2 class="rg-branding-primary">Usage Plans</h2>
+  </div>
+</div>
+<% unless @current_account %>
+  <div class="row">
+    <div class="col-12">
+      <p class="text-center py-1">
+        <% if @login_session %>
+          Please
+          <%= link_to 'sign up', :action => :quick_purchase %>
+          to purchase
+        <% else %>
+          Please
+          <%= link_to 'sign up', :action => :quick_purchase %>
+          or
+          <%= link_to 'login', :action => :index %>
+          to purchase
+        <% end %>
+      </p>
+
+    </div>
+  </div>
+<% end %>
+<% if @current_account && @current_account.usage_plan && @current_account.usage_plan.price %>
+  <div class="row mb-0">
+    <div class="col-12">
+      <h3>Most Recent Plan</h3>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 bg-white rounded shadow-sm p-4">
+      <p class="text-center align-self-center mb-0">
+        Your most recent plan was the
+        <strong class="rg-branding-primary"><%=@current_account.usage_plan.name%></strong>
+        plan at
+        <strong class="rg-branding-primary">$<%= sprintf("%.2f", @current_account.usage_plan.price) %></strong>
+      </p>
+    </div>
+  </div>
+<% end %>
+<%= render :partial => 'prorated_credit' %>
+<% @usage_plans.sort_by {|p| [ (@current_account_or_token.try(:usage_plan) == p ? 0 : 1), p.price ] }
+               .each do |usage_plan| %>
+  <% if usage_plan.merchant && usage_plan.merchant.offsite_gateway? && ! usage_plan.price_free? %>
+    <div class="row">
+      <div class="col-12 bg-white my-3 rounded shadow-sm">
+        <%= render :partial => 'usage_plan', :object => usage_plan %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 pb-4">
+        <%= render :partial => 'usage_plan_purchase_button', :locals => { :usage_plan => usage_plan, :merchant => @merchant } %>
+      </div>
+    </div>
+  <% else %>
+    <%= form_for(usage_plan, :url => { :action => :usage_plan_purchase, id: usage_plan.id }, :method => :get,
+      :html => { :name => sprintf('build_subscription_%i', usage_plan.id), :class => 'build_usage_plan' }) do |f| %>
+      <div class="row">
+        <div class="col-12 bg-white my-3 rounded shadow-sm">
+          <%= render :partial => 'usage_plan', :object => usage_plan %>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 pb-4">
+          <%= render :partial => 'usage_plan_purchase_button', :locals => { :usage_plan => usage_plan, :merchant => @merchant } %>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

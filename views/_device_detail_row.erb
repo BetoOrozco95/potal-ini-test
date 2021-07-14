@@ -1,0 +1,38 @@
+<% device_session = @current_account_or_token.login_sessions.find_by(mac: device.mac) %>
+<tr>
+  <th ></th>
+  <td>
+    <%= link_to device.name || device.hostname || device.mac, "#device_detail_modal_#{device.id}", { data: {"target" => "#device_detail_modal_#{device.id}", 'toggle' => 'modal'} } %>
+  </td>
+  <td>
+    <%= device.mac %>
+  </td>
+  <td>
+    <%= Mac.vendor_for_mac(device.mac) || 'Unknown' %>
+  </td>
+  <% if @current_account_or_token.ips_are_static? && @current_account_or_token.max_dedicated_ips.to_i > 0 %>
+    <td>
+      <%= form_for(device, :url => {action: :update_device, id: device.id}, :html => {:class => 'disabled-form'}) do |f| %>
+        <label class="select">
+          <%= f.select :static_ip_id, @current_account_or_token.static_ips.pluck(:public_ip, :id), { :include_blank => ' - Select a Static IP - ' }, { :class => 'form-control' } %>
+        </label>
+        <%= button_tag('<i class="fas fa-save"></i>'.html_safe, { :class => 'text-primary border-0 bg-transparent' }) %>
+      <% end %>
+    </td>
+  <% elsif @current_account_or_token.unique_ips.length > 1 %>
+    <td>
+      <span><%= device.public_ip || '–' %></span>
+    </td>
+  <% end %>
+  <td>
+    <span><%= device_session.try(:ip) || 'Offline' %></span>
+  </td>
+  <td>
+    <%= device.device_port_forwards.exists? && device.device_port_forwards.count > 0 ? device.device_port_forwards.count : '–' %><%= device.binat ? ' (DMZ)' : nil %>
+  </td>
+  <td class="action-cell">
+    <% if @current_account && @current_account.lock_devices == false %>
+    <%= link_to('<i class="fas fa-trash"></i>'.html_safe, "#confirm_delete_device_modal_#{device.id}", { data: {"target" => "#confirm_delete_device_modal_#{device.id}", 'toggle' => 'modal' } }) %>
+    <% end %>
+  </td>
+</tr>

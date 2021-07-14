@@ -1,0 +1,52 @@
+<nav class="d-flex flex-column justify-content-around icon-menu">
+  <div class="d-none d-md-flex mb-2 p-3 h3 position-relative align-items-center rounded">
+    <%= link_to '[BRAND]', { :action => :index }, { :class => 'navbar-brand nav-link sidebar' } %>
+  </div>
+
+  <ul class='nav flex-column'>
+    <li class='nav-item'>
+      <%= link_to 'Name Lastname', { :action => :account_info }, { :class => 'navbar-brand nav-link sidebar' } %>
+      <hr class="d-md-none d-lg-block" style="border-top: 1px solid #fff;">
+    </li>
+    <li class='nav-item'>
+      <div class='d-flex flex-row'>
+        <%= image_tag "portal/default/devices_icon.svg", class: "img-fluid mr-1 d-md-none d-lg-flex" %>
+        <%= link_to 'Devices', { :action => :manage_devices }, { :class => 'navbar-brand nav-link sidebar' } %>
+      </div>
+      <hr class="d-md-none d-lg-block" style="border-top: 1px solid #fff;">
+    </li>
+    <li class='nav-item'>
+      <div class='d-flex flex-row'>
+        <%= image_tag "portal/default/billing_icon.svg", class: "img-fluid mr-1 d-md-none d-lg-flex" %>
+        <%= link_to 'Billing', { :action => :billing }, { :class => 'navbar-brand nav-link sidebar' } %>
+      </div>
+      <hr class="d-md-none d-lg-block" style="border-top: 1px solid #fff;">
+    </li>
+    <li class='nav-item'>
+      <div class='d-flex flex-row'>
+        <%= image_tag "portal/default/usage_icon.svg", class: "img-fluid mr-1 d-md-none d-lg-flex" %>
+        <%= link_to 'Usage', { :action => :usage }, { :class => 'navbar-brand nav-link sidebar' } %>
+      </div>
+      <hr class="d-md-none d-lg-block" style="border-top: 1px solid #fff;">
+    </li>
+    <li class='nav-item'>
+      <div class='d-flex flex-row'>
+        <%= image_tag "portal/default/groups_icon.svg", class: "img-fluid mr-1 d-md-none d-lg-flex" %>
+        <%= link_to 'Groups', { :action => :index }, { :class => 'navbar-brand nav-link sidebar' } %>
+      </div>
+      <hr class="d-md-none d-lg-block" style="border-top: 1px solid #fff;">
+    </li>
+    <li class='nav-item'>
+      <div class='d-flex flex-row'>
+        <%= image_tag "portal/default/iot_icon.svg", class: "img-fluid mr-1 d-md-none d-lg-flex" %>
+        <%= link_to 'IoT', { :action => :index }, { :class => 'navbar-brand nav-link sidebar' } %>
+      </div>
+      <hr class="d-md-none d-lg-block" style="border-top: 1px solid #fff;">
+    </li>
+    <li class='nav-item'>
+      <% if ! @login_session.account || (@login_session.account && @login_session.account.lock_devices == false) %>
+        <%= link_to 'Logout', { :action => :login_session_destroy, :method => :delete }, { :class => 'nav-link sidebar'} %>
+      <% end %>
+    </li>
+  </ul>
+</nav>

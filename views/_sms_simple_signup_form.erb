@@ -1,0 +1,43 @@
+<%= form_for @account, :url => { :action => :sms_account_create },
+  :html => { :id => 'sms_account_create_form' } do |f| %>
+  <fieldset>
+    <legend class="col-12 text-center">SMS Signup</legend>
+    <p class="col-12 text-center">
+      Supply a valid mobile phone number below to receive your Internet access
+      token via SMS.
+    </p>
+    <div class="form-group col-12">
+      <!-- Uncomment and remove the form field below to obviate the need for the
+      end-user to supply a first name -->
+      <%# f.hidden_field :first_name, :value => "SMS Auth" %>
+      <%= f.label :first_name, :class => 'sr-only' %>
+      <%= f.text_field :first_name, :placeholder => 'First Name...', :class => 'form-control form-control-lg', :required => true %>
+    </div>
+    <div class="form-group col-12">
+      <!-- Uncomment and remove the form field below to obviate the need for the
+      end-user to supply a last name -->
+      <%# f.hidden_field :last_name, :value => "SMS Auth" %>
+      <%= f.label :last_name, :class => 'sr-only' %>
+      <%= f.text_field :last_name, :placeholder => 'Last Name...', :class => 'form-control form-control-lg', :required => true %>
+    </div>
+    <div class="form-group col-12">
+      <!-- Uncomment and remove the form field below to obviate the need for the
+      end-user to supply a last name -->
+      <%# f.hidden_field :email, :value => "SMS Auth" %>
+      <%= f.label :email, :class => 'sr-only' %>
+      <%= f.text_field :email, :placeholder => 'Email...', :class => 'form-control form-control-lg', :required => true %>
+    </div>
+    <div class="form-group col-12">
+      <%= f.label :phone, :class => 'sr-only' %>
+      <%= f.text_field :phone, :placeholder => 'Mobile Phone...', :class => 'form-control form-control-lg', :required => true %>
+    </div>
+    <div class="form-group col-12">
+      <%= f.label :faddress2, :class => 'sr-only' %>
+      <%= f.select :address2, options_for_select(@sms_email_suffix_by_carrier.to_a, :disabled => [nil] ), { :prompt => '-- Choose Mobile Carrier --' }, { :class => 'form-control form-control form-control-lg', :required => true } %>
+    </div>
+    <div class="form-group col-12">
+      <%= render :partial => 'terms_checkbox' %>
+      <%= button_tag('Continue', :class => 'd-block mx-auto col-6 btn btn-lg btn-primary shadow-sm', :data => { :disable_with => '<span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span> Please wait...' }) %>
+    </div>
+  </fieldset>
+<% end %> <!-- end form_for @account -->
