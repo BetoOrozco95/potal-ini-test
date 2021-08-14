@@ -64,7 +64,7 @@
                 </div>
               </div>
             </div>
-            <%= link_to (portal_inline_svg 'logo-xibalba.webp', :style => 'height: 50px;'), { :action => :index }, { :class => 'navbar-brand mx-auto' } %>
+            <%= link_to (portal_inline_svg 'logo-xibalba.svg', :style => 'height: 50px;'), { :action => :index }, { :class => 'navbar-brand mx-auto' } %>
           </div>
           <%= link_to "Color&nbsp;Accessibility#{session['color_accessibility'] ? "&nbsp;Mode" : '?'}".html_safe, params.to_unsafe_h.merge(color_accessibility: true), :class => "color-accessibility d-none"%>
         </nav>
