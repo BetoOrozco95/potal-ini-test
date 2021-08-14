@@ -1,13 +1,14 @@
-<aside class="col-12 col-lg-6 p-0 hero-wrapper" aria-hidden="true">
-	<div class="hero-xibalba">
-		<div class="<%= 'd-none d-lg-block' if action_name != 'index' %>">
-			<% if (rotator = Rotator.find_by_urn("#{controller_name}")) && rotator.rotatees.any? %>
+<aside class="col-12 col-lg-6 p-0 hero-wrapper-xibalba" aria-hidden="true">
+
+<!--	<div class="hero-xibalba">
+		<div class="<%#= 'd-none d-lg-block' if action_name != 'index' %>">
+			<%# if (rotator = Rotator.find_by_urn("#{controller_name}")) && rotator.rotatees.any? %>
 			<div id="hero-rotator">
-				<%= render partial: 'rotator', locals: { urn: controller_name } %>
+				<%#= render partial: 'rotator', locals: { urn: controller_name } %>
 			</div>
-			<% else %>
-			<%= render_portal_partial 'welcome_message' %>
-			<% end %>
+			<%# else %>
+			<%#= render_portal_partial 'welcome_message' %>
+			<%# end %>
 		</div>
-	</div>
+	</div>-->
 </aside>
