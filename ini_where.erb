@@ -44,7 +44,7 @@
     <%= render :partial => 'cookie_consent' %>
   <% end %>
   <div id="wrapper">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm top-nav">
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm top-nav bg-xibalba">
 
           <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
@@ -64,7 +64,7 @@
                 </div>
               </div>
             </div>
-            <%= link_to (portal_inline_svg 'default_icon.svg', :style => 'height: 50px;'), { :action => :index }, { :class => 'navbar-brand mx-auto' } %>
+            <%= link_to (portal_inline_svg 'logo-xibalba.webp', :style => 'height: 50px;'), { :action => :index }, { :class => 'navbar-brand mx-auto' } %>
           </div>
           <%= link_to "Color&nbsp;Accessibility#{session['color_accessibility'] ? "&nbsp;Mode" : '?'}".html_safe, params.to_unsafe_h.merge(color_accessibility: true), :class => "color-accessibility d-none"%>
         </nav>
