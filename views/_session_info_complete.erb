@@ -1,6 +1,6 @@
 <div class="row">
-  <%= render :partial => 'landing_rotator' %>
   <%= render :partial => 'summary_session_info' %>
+  <%= render :partial => 'landing_rotator' %>
   <%= render :partial => 'summary_profile' if @current_account %>
   <%= render :partial => 'summary_devices' if @current_account_or_token %>
   <%= render :partial => 'summary_usage' if @current_account_or_token %>
